@@ -6,7 +6,7 @@ Comenzamos actualizando la lista de paquetes del sistema e instalando todo el *s
 necesario, incluyendo el servidor web Apache, MySQL y las extensiones de PHP requeridas por
 WordPress.
 ```bash 
-sudo apt update
+sudo apt update (Actualiza la lista de paquetes disponibles en los repositorios)
 ```
 Instalar el servidor web y paquetes PHP/MySQL: 
 
@@ -26,14 +26,15 @@ sudo apt install apache2 \
     php-xml \ 
     php-zip 
    wget \
+(Instala Apache (servidor web), MySQL (base de datos), PHP y varias extensiones necesarias para que WordPress funcione correctamente)
  ```
 ![1.png](capturas/1.png)
 ---
 # 🛠️ _PASO 2: Instalar WordPress_
  ```Para este paso utilice los siguientes comandos: ```
-``` sudo mkdir -p /srv/www ```
-```sudo chown www-data: /srv/www ```
-```curl https://wordpress.org/latest.tar.gz | sudo -u www-data tar zx -C /srv/www ```
+``` sudo mkdir -p /srv/www (Crea la carpeta donde se alojará WordPress)```
+```sudo chown www-data: /srv/www (Cambia el propietario de la carpeta al usuario www-data (el que usa Apache)```
+```curl https://wordpress.org/latest.tar.gz | sudo -u www-data tar zx -C /srv/www (Descarga y descomprime la última versión de WordPress directamente en /srv/www.)```
 ![2.png](capturas/2.png)
 
 # _PASO 3: Configurar Apache_
@@ -51,48 +52,54 @@ Require all granted
 Options FollowSymLinks
 Require all granted
 </Directory>
-</VirtualHost> 
+</VirtualHost>
+(Define el sitio virtual de WordPress:
+ -DocumentRoot: indica la carpeta raíz del sitio.
+ -<Directory>: permisos y reglas para que Apache sirva WordPress correctamente.
+ -AllowOverride: permite el uso de .htaccess.)
 ```
 ![3.png](capturas/3.png)
 `Luego habilité el sitio: `
-```sudo a2ensite wordpress ```
+```sudo a2ensite wordpress (Activa el sitio de WordPress.) ```
 ![4.png](capturas/4.png)
 `Para habilitar la reescritura de URL: `
-```sudo a2enmod rewrite```
+```sudo a2enmod rewrite (Habilita el módulo de reescritura de URL (necesario para enlaces permanentes))```
 ![5.png](capturas/5.png)
 `Desactivar el sitio predeterminado de "Funciona" con:`
-```sudo a2dissite 000-default```
+```sudo a2dissite 000-default (Desactiva el sitio por defecto de Apache)```
 ![6.png](capturas/6.png)
 `Finalmente reinicié Apache para aplicar los cambios:`
-```sudo service apache2 reload```
+```sudo service apache2 reload (Recarga Apache para aplicar los cambios)```
 ![7.png](capturas/7.png)
 
 # _PASO 4: Creamos la BD MySQL_
 `Para este paso ingresé a MySQL con:`
-```sudo mysql -u root```
+```sudo mysql -u root (Entra a la consola de MySQL como administrador.)```
 ![8.png](capturas/8.png)
 `Ya dentro de MySQL, creé la base de datos, el usurio y le di permisos con los siguientes comandos:`
-```CREATE DATABASE wordpress
-```CREATE USER wordpress@localhost IDENTIFIED BY '<vboxuser>';
-``` GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER ON wordpress.* TO wordpress@localhost;
+```CREATE DATABASE wordpress (Crea la base de datos para WordPress.)
+```CREATE USER wordpress@localhost IDENTIFIED BY '<vboxuser>'; (Crea un usuario para la base de datos con contraseña.)
+``` GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER ON wordpress.* TO wordpress@localhost; (Da permisos al usuario sobre la base de datos.)
 ``` 
 `Y para guardar los cambios/permidos que le hemos dado al usuario usamos:`
-```FLUSH PRIVILEGES;```
+```FLUSH PRIVILEGES; (Refresca los permisos para que los cambios tomen efecto.)```
 `para salir de MySQL:`
-```EXIT;```
+```EXIT; (Salir de MySQL)```
 ![9.png](capturas/9.png)
 
 # _PASO 5: Configurar WordPress_
 `para configurar WordPress, primero debemos copiar el archivo de configuración de muestra:`
-```sudo -u www-data cp /srv/www/wordpress/wp-config-sample.php /srv/www/wordpress/wp-config.php```
+```sudo -u www-data cp /srv/www/wordpress/wp-config-sample.php /srv/www/wordpress/wp-config.php (Copia el archivo de configuración de ejemplo a uno real.)```
 `establecemos credenciales de bd en el archivo de configuracion con los siguientes comandos:`
 ```sudo -u www-data sed -i "s/database_name_here/wordpress/" /srv/www/wordpress/wp-config.php```
 ```sudo -u www-data sed -i "s/username_here/wordpress/" /srv/www/wordpress/wp-config.php```
-```sudo -u www-data sed -i "s/password_here/<vboxuser>/" /srv/www/wordpress/wp-config.php```
+```sudo -u www-data sed -i "s/password_here/<vboxuser>/" /srv/www/wordpress/wp-config.php ```
+``` (Reemplaza en el archivo de configuración los valores de la base de datos, usuario y contraseña.)```
 ![10.png](capturas/10.png)
 
 `y finalmente  abrimos el archivo de configuracion en nano:`
-```sudo -u www-data nano /srv/www/wordpress/wp-config.php```
+```sudo -u www-data nano /srv/www/wordpress/wp-config.php (Abre el archivo para editar manualmente y añadir las claves de seguridad (salts) que WordPress utiliza para mayor protección de las sesiones y cookies.)```
+
 `En este punto tenemos que editar ciertas lineas:`
 ``` define( 'AUTH_KEY',         'put your unique phrase here' );
 define( 'SECURE_AUTH_KEY',  'put your unique phrase here' );
